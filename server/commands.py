@@ -23,7 +23,9 @@ from server.constants import TargetType
 from server import logger
 from server.exceptions import ClientError, ServerError, ArgumentError, AreaError
 
-
+def ooc_cmd_song(client, arg):
+    client.send_host_message('Current Song: {}\n Requested by {}'.format(client.area.current_music,client.area.current_music_player))
+    
 def ooc_cmd_switch(client, arg):
     if len(arg) == 0:
         raise ArgumentError('You must specify a character name.')
@@ -385,15 +387,16 @@ def ooc_cmd_toggleadverts(client, arg):
     client.send_host_message('Advertisements turned {}.'.format(adv_stat))
     
 def ooc_cmd_doc(client, arg):
-    if len(arg) == 0:
-        client.send_host_message('Document: {}'.format(client.area.doc))
-        logger.log_server(
-            '[{}][{}]Requested document. Link: {}'.format(client.area.id, client.get_char_name(), client.area.doc))
-    else:
+    client.send_host_message('Document: {}'.format(client.area.doc))
+    logger.log_server('[{}][{}]Requested document. Link: {}'.format(client.area.id, client.get_char_name(), client.area.doc))
+        
+def ooc_cmd_setdoc(client, arg):
+    if len(arg) == 1:
         client.area.change_doc(arg)
         client.area.send_host_message('{} changed the doc link.'.format(client.get_char_name()))
         logger.log_server('[{}][{}]Changed document to: {}'.format(client.area.id, client.get_char_name(), arg))
-
+    else:
+        client.send_host_message('Please specify a document link.')
 
 def ooc_cmd_cleardoc(client, arg):
     if len(arg) != 0:
@@ -404,17 +407,17 @@ def ooc_cmd_cleardoc(client, arg):
     client.area.change_doc()
 
 
-def ooc_cmd_status(client, arg):
-    if len(arg) == 0:
-        client.send_host_message('Current status: {}'.format(client.area.status))
-    else:
-        try:
-            client.area.change_status(arg)
-            client.area.send_host_message('{} changed status to {}.'.format(client.get_char_name(), client.area.status))
-            logger.log_server(
-                '[{}][{}]Changed status to {}'.format(client.area.id, client.get_char_name(), client.area.status))
-        except AreaError:
-            raise
+#def ooc_cmd_status(client, arg):
+#    if len(arg) == 0:
+#        client.send_host_message('Current status: {}'.format(client.area.status))
+#    else:
+#        try:
+#            client.area.change_status(arg)
+#            client.area.send_host_message('{} changed status to {}.'.format(client.get_char_name(), client.area.status))
+#            logger.log_server(
+#                '[{}][{}]Changed status to {}'.format(client.area.id, client.get_char_name(), client.area.status))
+#        except AreaError:
+#            raise
 
 
 def ooc_cmd_online(client, _):
@@ -424,17 +427,21 @@ def ooc_cmd_online(client, _):
 def ooc_cmd_area(client, arg):
     args = arg.split()
     if len(args) == 0:
-        client.send_area_list()
+        client.send_area_info(client.area.id, False)
     elif len(args) == 1:
         try:
             area = client.server.area_manager.get_area_by_id(int(args[0]))
             client.change_area(area)
+            client.send_host_message('Went to {}'.format(client.area.name))
         except ValueError:
             raise ArgumentError('Area ID must be a number.')
         except (AreaError, ClientError):
             raise
     else:
         raise ArgumentError('Too many arguments. Use /area <id>.')
+
+def ooc_cmd_areas(client, arg):
+    client.send_area_list()
         
 def ooc_cmd_pm(client, arg):
     args = arg.split()
@@ -506,9 +513,6 @@ def ooc_cmd_randomchar(client, arg):
     except ClientError:
         raise
     client.send_host_message('Randomly switched to {}'.format(client.get_char_name()))
-    
-def ooc_cmd_getarea(client, arg):
-    client.send_area_info(client.area.id, False)
     
 def ooc_cmd_getareas(client, arg):
     client.send_area_info(-1, False)

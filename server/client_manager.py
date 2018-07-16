@@ -88,7 +88,7 @@ class ClientManager:
             self.send_command('CT', self.server.config['hostname'], msg)
 
         def send_motd(self):
-            self.send_host_message('=== MOTD ===\r\n{}\r\n============='.format(self.server.config['motd']))
+            self.send_command('CT', '', '=== MOTD ===\r\n{}\r\n============='.format(self.server.config['motd']))
 
         def send_player_count(self):
             self.send_host_message('{}/{} players online.'.format(
@@ -185,7 +185,7 @@ class ClientManager:
             self.area = area
             area.new_client(self)
 
-            self.send_host_message('Changed area to {}.[{}]'.format(area.name, self.area.status))
+            #self.send_host_message('Changed area to {}.[{}]'.format(area.name, self.area.status))
             logger.log_server(
                 '[{}]Changed area from {} ({}) to {} ({}).'.format(self.get_char_name(), old_area.name, old_area.id,
                                                                    self.area.name, self.area.id), self)
@@ -203,10 +203,10 @@ class ClientManager:
                     for client in [x for x in area.clients if x.is_cm]:
                         owner = 'MASTER: {}'.format(client.get_char_name())
                         break
-                msg += '\r\nArea {}: {} (users: {}) [{}][{}]{}'.format(i, area.name, len(area.clients), area.status, owner, lock[area.is_locked])
+                msg += '\r\n[{}: {} (users: {}) {}'.format(i, area.name, len(area.clients), lock[area.is_locked])
                 if self.area == area:
                     msg += ' [*]'
-            self.send_host_message(msg)
+            self.send_command('CT', '', msg)
 
         def get_area_info(self, area_id, mods):
             info = ''
@@ -214,7 +214,7 @@ class ClientManager:
                 area = self.server.area_manager.get_area_by_id(area_id)
             except AreaError:
                 raise
-            info += '= Area {}: {} =='.format(area.id, area.name)
+            info += '== {} =='.format(area.name)
             sorted_clients = []
             for client in area.clients:
                 if (not mods) or client.is_mod:
@@ -232,7 +232,7 @@ class ClientManager:
             if area_id == -1:
                 # all areas info
                 cnt = 0
-                info = '\n== Area List =='
+                info = '\n== Areas =='
                 for i in range(len(self.server.area_manager.areas)):
                     if len(self.server.area_manager.areas[i].clients) > 0:
                         cnt += len(self.server.area_manager.areas[i].clients)

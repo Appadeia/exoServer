@@ -40,7 +40,7 @@ class AreaManager:
             self.hp_def = 10
             self.hp_pro = 10
             self.doc = 'No document.'
-            self.status = 'IDLE'
+#            self.status = 'IDLE'
             self.judgelog = []
             self.current_music = ''
             self.current_music_player = ''
@@ -139,12 +139,12 @@ class AreaManager:
             self.background = bg
             self.send_command('BN', self.background)
 
-        def change_status(self, value):
-            allowed_values = ('idle', 'building-open', 'building-full', 'casing-open', 'casing-full', 'recess')
-            if value.lower() not in allowed_values:
-                raise AreaError('Invalid status. Possible values: {}'.format(', '.join(allowed_values)))
-            self.status = value.upper()
-
+#        def change_status(self, value):
+#            allowed_values = ('idle', 'building-open', 'building-full', 'casing-open', 'casing-full', 'recess')
+#            if value.lower() not in allowed_values:
+#                raise AreaError('Invalid status. Possible values: {}'.format(', '.join(allowed_values)))
+#            self.status = value.upper()
+#
         def change_doc(self, doc='No document.'):
             self.doc = doc
 
